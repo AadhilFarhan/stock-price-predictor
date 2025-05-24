@@ -1,6 +1,8 @@
 from utils.news_scraper import fetch_news
 from utils.sentiment import analyze_sentiment
 from model.price_predictor import train_predict_price
+from model.price_predictor import train_predict_price_new
+from model.price_predictor import  train_xgb_predict_next_day
 from model.strategy import decide_action
 from utils.buy_quantity import suggest_quantity
 from utils.data_fetcher import get_minute_data_from_source
@@ -29,7 +31,7 @@ def run(stock_symbol="RELIANCE.NS", capital=10000, source="fyers", api_keys=None
     #     return
 
     print(f"Fetching historical data for {stock_symbol}")
-    df = yf.download(stock_symbol, interval="5m", period=f"60d")
+    df = yf.download(stock_symbol, interval=f"5m", period=f"60d")
     df = df.reset_index().rename(columns={"Datetime": "Date"})
 
     print(df)
@@ -48,8 +50,19 @@ def run(stock_symbol="RELIANCE.NS", capital=10000, source="fyers", api_keys=None
     sentiments = analyze_sentiment(news_list)
     print(f"🧠 Sentiment: {sentiments['label']} ({sentiments['score']:.2f})")
 
-    predicted_price = train_predict_price(df)
-    print(f"📈 Predicted next price: ₹{predicted_price:.2f}")
+    print(f"DAYS IS: {days}")
+
+    if days == 8:
+        predicted_price = train_xgb_predict_next_day(df)
+        print(f"📈 XGB Predicted next price: ₹{predicted_price:.2f}")
+    elif days ==7:
+        predicted_price = train_predict_price(df)
+        print(f"📈 Prophet Predicted next price: ₹{predicted_price:.2f}")
+    elif days == 6:
+        predicted_price = train_predict_price_new(df)
+        print(f"📈 Prophet NEW Predicted next price: ₹{predicted_price:.2f}")
+
+    
 
     last_close = df['Close'].iloc[-1]
     decision = decide_action(last_close, predicted_price, sentiments['label'])

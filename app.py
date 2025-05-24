@@ -14,6 +14,7 @@ def home():
 @app.route('/predict', methods=['POST'])
 def predict():
     data = request.json
+    print(data)
     stocks = data.get('stocks', [])
     days = data.get('days', 7)
     capital = data.get('capital', 10000)
@@ -40,5 +41,6 @@ def predict():
 
 
 if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 5000))
-    app.run(host="0.0.0.0", port=port)
+    # port = int(os.environ.get("PORT", 5000))
+    # app.run(host="0.0.0.0", port=port)
+    app.run(host='0.0.0.0', port=5000)
